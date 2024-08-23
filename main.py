@@ -1,48 +1,18 @@
 import flet as ft
 import requests
+import bandeiras_moedas
 
 url = "https://open.er-api.com/v6/latest/USD"
 response = requests.get(url)
 
-bandeiras_moedas = {
-    "us": "USD",
-    "ca": "CAD",
-    "gb": "GBP",
-    "eu": "EUR",
-    "br": "BRL",
-    "jp": "JPY",
-    "au": "AUD",
-    "cn": "CNY",
-    "in": "INR",
-    "ru": "RUB",
-    "za": "ZAR",
-    "mx": "MXN",
-    "ar": "ARS",
-    "ch": "CHF",
-    "se": "SEK",
-    "no": "NOK",
-    "dk": "DKK",
-    "kr": "KRW",
-    "sg": "SGD",
-    "nz": "NZD",
-    "hk": "HKD",
-    "sa": "SAR",
-    "ae": "AED",
-    "tr": "TRY",
-    "eg": "EGP",
-}
 
-moedas_bandeiras = {valor: chave for chave, valor in bandeiras_moedas.items()}
+moedas_bandeiras = {valor: chave for chave, valor in bandeiras_moedas.bandeiras_moedas.items()}
 
 
 if response.status_code == 200:
-    try:
-        dados = response.json()
-        # print(dados["rates"])
-        taxa_eur = dados.get('rates', {}).get('EUR', 'Não disponível')
-        print(f"Taxa de câmbio USD para EUR: {taxa_eur}")
-    except ValueError:
-        print("erro ao tentar parsear para json")
+    dados = response.json()
+else:
+    exit()
 
 enxchange_logo = ft.Image(src="./assets/exchange-logo.png", color="#000000", width=100, height=100)
 
@@ -57,16 +27,22 @@ def main(page: ft.Page):
 
     botao_temas = ft.IconButton(icon=ft.icons.DARK_MODE, icon_size=30, on_click=lambda handle: handle_theme())
 
-    def handleFlags(flag):
-        flag = moedas_bandeiras.get("BRL")
-        page.update
-        return flag
-
-    def mudar_bandeira(value):
-        handleFlags(moedas_bandeiras[value])
+    def mudar_bandeira(e):
+        bandeiras1.src = f"https://flagcdn.com/64x48/{moedas_bandeiras[dropdown1.value]}.png"
+        bandeiras2.src = f"https://flagcdn.com/64x48/{moedas_bandeiras[dropdown2.value]}.png"
+        if e.control.label == "Moeda Origem":
+            texto_cambio.value = f"1 {dropdown2.value} = {dados.get("rates").get(dropdown1.value)} {dropdown1.value}"
+        else:
+            texto_cambio.value = f"1 {dropdown2.value} = {dados.get("rates").get(dropdown2.value)} {dropdown1.value}"
         page.update()
 
-    dropdown = ft.Dropdown(width=100, label="Moeda", value=bandeiras_moedas["br"], on_change=mudar_bandeira(), options=[])
+    dropdown1 = ft.Dropdown(width=110, label="Moeda Origem", value=bandeiras_moedas.bandeiras_moedas["br"], on_change=mudar_bandeira, options=[])
+    bandeiras1 = ft.Image(f"https://flagcdn.com/64x48/br.png", fit=ft.ImageFit.COVER, border_radius=100)
+    dropdown2 = ft.Dropdown(width=110, label="Moeda Destino", value=bandeiras_moedas.bandeiras_moedas["us"], on_change=mudar_bandeira, options=[])
+    bandeiras2 = ft.Image(f"https://flagcdn.com/64x48/us.png", fit=ft.ImageFit.COVER, border_radius=100)
+    campo_valor1 = ft.TextField(width=100, height=45, value=str("%.2f" % 1000), tooltip=f"Selecione a quatidade de {dropdown1.value} a ser convertido", label="Quantidade")
+    campo_valor2 = ft.TextField(width=100, height=45, value="0", tooltip=f"Valor convertido em {dropdown2.value}", label="Resultado", read_only=True)
+    texto_cambio = ft.Text(f"1 {dropdown2.value} = {dados.get("rates").get(dropdown1.value)} {dropdown1.value}")
     def handle_theme():
         if page.theme_mode == "dark":
             page.theme_mode = "light"
@@ -81,11 +57,20 @@ def main(page: ft.Page):
 
     def carregar_moedas():
         for x in dados["rates"]:
-            dropdown.options.append(ft.dropdown.Option(x))
+            dropdown1.options.append(ft.dropdown.Option(x))
+            dropdown2.options.append(ft.dropdown.Option(x))
 
         page.update()
 
     carregar_moedas()
+
+    def calcular_cambio(moeda1, moeda2):
+        quantidade_a_ser_convertido = campo_valor1.value
+        taxa = dados.get("rates")
+        resultado = (taxa.get(moeda1) * float(quantidade_a_ser_convertido)) / taxa.get(moeda2)
+        campo_valor2.value = "%.2f" % resultado
+        page.update()
+
     page.add(
         ft.Column(
             [
@@ -105,33 +90,40 @@ def main(page: ft.Page):
                 ft.Container(
                     content=ft.Row(
                         [
-                            ft.Image(f"https://flagcdn.com/64x48/{handleFlags()}.png",
-                                     fit=ft.ImageFit.COVER,
-                                     border_radius=100
-                                     ),
-                            dropdown,
-                            ft.TextField(width=100, height=45, value="1000", tooltip="Selecione a quatidade", label="Quantidade")
+                            bandeiras1,
+                            dropdown1,
+                            campo_valor1
                         ],
                         alignment=ft.MainAxisAlignment.CENTER,
                         # horizontal_alignment=ft.CrossAxisAlignment.CENTER
                     )
                 ),
                 ft.Container(
-                    content=ft.IconButton(icon=ft.icons.SWAP_VERT, icon_size=40, tooltip="Aperte para converter"),
+                    content=ft.IconButton(
+                        icon=ft.icons.SWAP_VERT,
+                        icon_size=40,
+                        tooltip="Aperte para converter",
+                        on_click=lambda calcular: calcular_cambio(dropdown1.value, dropdown2.value)
+                    ),
                 ),
                 ft.Container(
                     content=ft.Row(
                         [
-                            ft.Image("https://flagcdn.com/64x48/us.png", border_radius=100),
-                            dropdown,
-                            ft.TextField(width=100, height=45, value="1000", tooltip="Selecione a quatidade", label="Quantidade")
+                            bandeiras2,
+                            dropdown2,
+                            campo_valor2
                         ],
                         alignment=ft.MainAxisAlignment.CENTER,
                        # horizontal_alignment=ft.CrossAxisAlignment.CENTER
                     )
                 ),
                 ft.Container(
-                    content=ft.Column([ft.Text("Taxa de conversão", style=ft.TextThemeStyle.LABEL_SMALL), ft.Text("1 USD = 5.66322 USD")])
+                    content=ft.Column(
+                        [
+                            ft.Text("Taxa de conversão", style=ft.TextThemeStyle.LABEL_SMALL),
+                            texto_cambio
+                        ]
+                    )
                 )
             ],
             alignment=ft.MainAxisAlignment.CENTER,

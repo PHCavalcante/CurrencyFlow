@@ -1,20 +1,32 @@
 import flet as ft
 import requests
 import bandeiras_moedas
-
-url = "https://open.er-api.com/v6/latest/USD"
-response = requests.get(url)
-
+import os
 
 moedas_bandeiras = {valor: chave for chave, valor in bandeiras_moedas.bandeiras_moedas.items()}
 
 
-if response.status_code == 200:
+try:
+    url = "https://open.er-api.com/v6/latest/USD"
+    response = requests.get(url)
+    response.status_code == 200
     dados = response.json()
-else:
+except:
+    def main(page: ft.Page):
+        page.title = "Erro"
+        page.theme_mode = "system"
+        page.window_width = 400
+        page.window_height = 450
+        page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+        page.vertical_alignment = ft.MainAxisAlignment.CENTER
+        page.update()
+
+        page.add(ft.Text("ERRO: BAD RESPONSE. Por favor, verifique sua conexão com a internet",
+                         style=ft.TextStyle(color=ft.colors.ERROR)))
+    ft.app(main)
     exit()
 
-enxchange_logo = ft.Image(src="./assets/exchange-logo.png", color="#000000", width=100, height=100)
+enxchange_logo = ft.Image(src=os.path.join(os.path.dirname(__file__), "exchange-logo.png"), color="#000000", width=100, height=100)
 
 def main(page: ft.Page):
     page.title = "Conversor de Moedas"
@@ -28,12 +40,12 @@ def main(page: ft.Page):
     botao_temas = ft.IconButton(icon=ft.icons.DARK_MODE, icon_size=30, on_click=lambda handle: handle_theme())
 
     def mudar_bandeira(e):
-        bandeiras1.src = f"https://flagcdn.com/64x48/{moedas_bandeiras[dropdown1.value]}.png"
-        bandeiras2.src = f"https://flagcdn.com/64x48/{moedas_bandeiras[dropdown2.value]}.png"
         if e.control.label == "Moeda Origem":
-            texto_cambio.value = f"1 {dropdown2.value} = {dados.get("rates").get(dropdown1.value)} {dropdown1.value}"
+            bandeiras1.src = f"https://flagcdn.com/64x48/{moedas_bandeiras[dropdown1.value]}.png"
+            texto_cambio.value = f"1 {dropdown2.value} = {"%.2f" % dados.get("rates").get(dropdown1.value)} {dropdown1.value}"
         else:
-            texto_cambio.value = f"1 {dropdown2.value} = {dados.get("rates").get(dropdown2.value)} {dropdown1.value}"
+            bandeiras2.src = f"https://flagcdn.com/64x48/{moedas_bandeiras[dropdown2.value]}.png"
+            texto_cambio.value = f"1 {dropdown2.value} = {"%.2f" % dados.get("rates").get(dropdown2.value)} {dropdown1.value}"
         page.update()
 
     dropdown1 = ft.Dropdown(width=110, label="Moeda Origem", value=bandeiras_moedas.bandeiras_moedas["br"], on_change=mudar_bandeira, options=[])
@@ -42,7 +54,7 @@ def main(page: ft.Page):
     bandeiras2 = ft.Image(f"https://flagcdn.com/64x48/us.png", fit=ft.ImageFit.COVER, border_radius=100)
     campo_valor1 = ft.TextField(width=100, height=45, value=str("%.2f" % 1000), tooltip=f"Selecione a quatidade de {dropdown1.value} a ser convertido", label="Quantidade")
     campo_valor2 = ft.TextField(width=100, height=45, value="0", tooltip=f"Valor convertido em {dropdown2.value}", label="Resultado", read_only=True)
-    texto_cambio = ft.Text(f"1 {dropdown2.value} = {dados.get("rates").get(dropdown1.value)} {dropdown1.value}",
+    texto_cambio = ft.Text(f"1 {dropdown2.value} = {"%.2f" % dados.get("rates").get(dropdown1.value)} {dropdown1.value}",
                            style=ft.TextStyle(weight=ft.FontWeight.BOLD))
     def handle_theme():
         if page.theme_mode == "dark":

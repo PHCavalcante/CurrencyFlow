@@ -20,7 +20,7 @@ def main(page: ft.Page):
     page.title = "Conversor de Moedas"
     page.theme_mode = "light"
     page.window_width = 400
-    page.window_height = 600
+    page.window_height = 450
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.update()
@@ -42,7 +42,8 @@ def main(page: ft.Page):
     bandeiras2 = ft.Image(f"https://flagcdn.com/64x48/us.png", fit=ft.ImageFit.COVER, border_radius=100)
     campo_valor1 = ft.TextField(width=100, height=45, value=str("%.2f" % 1000), tooltip=f"Selecione a quatidade de {dropdown1.value} a ser convertido", label="Quantidade")
     campo_valor2 = ft.TextField(width=100, height=45, value="0", tooltip=f"Valor convertido em {dropdown2.value}", label="Resultado", read_only=True)
-    texto_cambio = ft.Text(f"1 {dropdown2.value} = {dados.get("rates").get(dropdown1.value)} {dropdown1.value}")
+    texto_cambio = ft.Text(f"1 {dropdown2.value} = {dados.get("rates").get(dropdown1.value)} {dropdown1.value}",
+                           style=ft.TextStyle(weight=ft.FontWeight.BOLD))
     def handle_theme():
         if page.theme_mode == "dark":
             page.theme_mode = "light"
@@ -64,10 +65,11 @@ def main(page: ft.Page):
 
     carregar_moedas()
 
-    def calcular_cambio(moeda1, moeda2):
-        quantidade_a_ser_convertido = campo_valor1.value
-        taxa = dados.get("rates")
-        resultado = (taxa.get(moeda1) * float(quantidade_a_ser_convertido)) / taxa.get(moeda2)
+    def calcular_cambio(moeda1):
+        quantidade_a_ser_convertido = float(campo_valor1.value)
+        taxas = dados.get("rates")
+        taxa_moeda1 = taxas.get(moeda1)
+        resultado = quantidade_a_ser_convertido / taxa_moeda1
         campo_valor2.value = "%.2f" % resultado
         page.update()
 
@@ -84,7 +86,6 @@ def main(page: ft.Page):
                            botao_temas
                         ],
                         alignment=ft.MainAxisAlignment.CENTER,
-                        # vertical_alignment=ft.alignment.top_left
                     )
                 ),
                 ft.Container(
@@ -95,7 +96,6 @@ def main(page: ft.Page):
                             campo_valor1
                         ],
                         alignment=ft.MainAxisAlignment.CENTER,
-                        # horizontal_alignment=ft.CrossAxisAlignment.CENTER
                     )
                 ),
                 ft.Container(
@@ -103,7 +103,7 @@ def main(page: ft.Page):
                         icon=ft.icons.SWAP_VERT,
                         icon_size=40,
                         tooltip="Aperte para converter",
-                        on_click=lambda calcular: calcular_cambio(dropdown1.value, dropdown2.value)
+                        on_click=lambda calcular: calcular_cambio(dropdown1.value)
                     ),
                 ),
                 ft.Container(
@@ -114,16 +114,17 @@ def main(page: ft.Page):
                             campo_valor2
                         ],
                         alignment=ft.MainAxisAlignment.CENTER,
-                       # horizontal_alignment=ft.CrossAxisAlignment.CENTER
                     )
                 ),
                 ft.Container(
                     content=ft.Column(
                         [
-                            ft.Text("Taxa de conversão", style=ft.TextThemeStyle.LABEL_SMALL),
+                            ft.Text("Taxa de conversão", style=ft.TextThemeStyle.LABEL_MEDIUM),
                             texto_cambio
-                        ]
-                    )
+                        ],
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    ),
+                    padding=10
                 )
             ],
             alignment=ft.MainAxisAlignment.CENTER,

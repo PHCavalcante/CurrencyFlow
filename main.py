@@ -5,11 +5,9 @@ import os
 
 moedas_bandeiras = {valor: chave for chave, valor in bandeiras_moedas.bandeiras_moedas.items()}
 
-
 try:
     url = "https://open.er-api.com/v6/latest/USD"
     response = requests.get(url)
-    response.status_code == 200
     dados = response.json()
 except:
     def main(page: ft.Page):
@@ -77,11 +75,17 @@ def main(page: ft.Page):
 
     carregar_moedas()
 
-    def calcular_cambio(moeda1):
+    def calcular_cambio():
         quantidade_a_ser_convertido = float(campo_valor1.value)
         taxas = dados.get("rates")
-        taxa_moeda1 = taxas.get(moeda1)
-        resultado = quantidade_a_ser_convertido / taxa_moeda1
+        taxa_moeda1 = taxas.get(dropdown1.value)
+        taxa_moeda2 = taxas.get(dropdown2.value)
+        if dropdown1.value == "USD":
+            resultado = quantidade_a_ser_convertido * taxa_moeda2
+        elif dropdown2.value == "USD":
+            resultado = quantidade_a_ser_convertido / taxa_moeda1
+        else:
+            resultado = (quantidade_a_ser_convertido / taxa_moeda1) * taxa_moeda2
         campo_valor2.value = "%.2f" % resultado
         page.update()
 
@@ -115,7 +119,7 @@ def main(page: ft.Page):
                         icon=ft.icons.SWAP_VERT,
                         icon_size=40,
                         tooltip="Aperte para converter",
-                        on_click=lambda calcular: calcular_cambio(dropdown1.value)
+                        on_click=lambda calcular: calcular_cambio()
                     ),
                 ),
                 ft.Container(

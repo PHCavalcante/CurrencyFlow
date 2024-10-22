@@ -18,9 +18,9 @@ distlib==0.3.6
 dulwich==0.21.3
 fastapi==0.115.2
 filelock==3.9.0
-flet==0.25.0.dev3519
+flet==0.24.1
 flet-cli==0.25.0.dev3519
-flet-core==0.25.0.dev3519
+flet-core==0.24.1
 flet-desktop==0.25.0.dev3519
 flet-desktop-light==0.25.0.dev3519
 flet-runtime==0.24.1

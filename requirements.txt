@@ -44,7 +44,7 @@ mdurl==0.1.2
 more-itertools==9.1.0
 msgpack==1.0.5
 oauthlib==3.2.2
-packaging==23.0
+packaging==23.1
 pexpect==4.8.0
 pipenv==2023.2.18
 pkginfo==1.9.6

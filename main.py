@@ -4,8 +4,14 @@ import bandeiras_moedas
 
 moedas_bandeiras = {valor: chave for chave, valor in bandeiras_moedas.bandeiras_moedas.items()}
 url = "https://open.er-api.com/v6/latest/USD"
-response = requests.get(url)
-dados = response.json()
+
+try:
+    response = requests.get(url, timeout=5)
+    response.raise_for_status()
+    dados = response.json()
+except requests.exceptions.RequestException as e:
+    print(f"Error in request {e}")
+
 enxchange_logo = ft.Image(src="./exchange-logo.png", color="#000000", width=100, height=100)
 
 def main(page: ft.Page):

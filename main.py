@@ -1,5 +1,5 @@
+from api import main
 import cachetools
-import aiohttp
 import asyncio
 import flet as ft
 import bandeiras_moedas
@@ -7,32 +7,6 @@ import bandeiras_moedas
 cache = cachetools.TTLCache(maxsize=100, ttl=3600)
 moedas_bandeiras = {valor: chave for chave, valor in bandeiras_moedas.bandeiras_moedas.items()}
 enxchange_logo = ft.Image(src="./exchange-logo.png", color="#000000", width=100, height=100)
-
-
-async def get_exchange_rates():
-    if "exchange_rates" in cache:
-        return cache["exchange_rates"]
-
-    url = "https://open.er-api.com/v6/latest/USD"
-
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                if response.status == 200:
-                    dados = await response.json()
-                    cache["exchange_rates"] = dados
-                    return dados
-                else:
-                    print(f"Error: {response.status}")
-                    return None
-    except aiohttp.ClientError as e:
-        print(f"Connection error: {e}")
-        return None
-
-
-async def main():
-    dados = await get_exchange_rates()
-    return dados
 
 dados = asyncio.run(main())
 

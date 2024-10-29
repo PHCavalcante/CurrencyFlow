@@ -1,10 +1,8 @@
 from api import main
-import cachetools
 import asyncio
 import flet as ft
 import bandeiras_moedas
 
-cache = cachetools.TTLCache(maxsize=100, ttl=3600)
 moedas_bandeiras = {valor: chave for chave, valor in bandeiras_moedas.bandeiras_moedas.items()}
 enxchange_logo = ft.Image(src="./exchange-logo.png", color="#000000", width=100, height=100)
 
@@ -133,4 +131,4 @@ def main(page: ft.Page):
     )
 
 
-ft.app(target=main, view=ft.AppView.WEB_BROWSER)
+ft.app(target=main)

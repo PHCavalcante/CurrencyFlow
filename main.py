@@ -1,30 +1,19 @@
-import requests
+import aiohttp
 import flet as ft
 import bandeiras_moedas
 
 moedas_bandeiras = {valor: chave for chave, valor in bandeiras_moedas.bandeiras_moedas.items()}
 enxchange_logo = ft.Image(src="./exchange-logo.png", color="#000000", width=100, height=100)
+url = "https://open.er-api.com/v6/latest/USD"
 
-try:
-    url = "https://open.er-api.com/v6/latest/USD"
-    response = requests.get(url)
-    dados = response.json()
-except:
-    def main(page: ft.Page):
-        page.title = "Erro"
-        page.theme_mode = "system"
-        page.window.width = 400
-        page.window.height = 450
-        page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-        page.vertical_alignment = ft.MainAxisAlignment.CENTER
-        page.update()
+async def fetch_data():
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status == 200:
+                dados = await response.json()
+                return dados
 
-        page.add(ft.Text("ERRO: BAD RESPONSE. Por favor, verifique sua conexão com a internet",
-                         style=ft.TextStyle(color=ft.colors.ERROR)))
-    ft.app(main)
-    exit()
-
-def main(page: ft.Page):
+async def main(page: ft.Page):
     page.title = "Conversor de Moedas"
     page.theme_mode = "light"
     page.window.width = 400
@@ -32,6 +21,7 @@ def main(page: ft.Page):
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.update()
+    dados = await fetch_data()
 
     botao_temas = ft.IconButton(icon=ft.icons.DARK_MODE, icon_size=30, on_click=lambda handle: handle_theme())
 

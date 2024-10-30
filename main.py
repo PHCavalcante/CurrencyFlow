@@ -1,4 +1,4 @@
-import aiohttp
+from pyodide.http import pyfetch
 import flet as ft
 import bandeiras_moedas
 
@@ -7,11 +7,8 @@ enxchange_logo = ft.Image(src="./exchange-logo.png", color="#000000", width=100,
 url = "https://open.er-api.com/v6/latest/USD"
 
 async def fetch_data():
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            if response.status == 200:
-                dados = await response.json()
-                return dados
+    response = await pyfetch(url)
+    return await response.json()
 
 async def main(page: ft.Page):
     page.title = "Conversor de Moedas"

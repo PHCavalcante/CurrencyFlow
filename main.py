@@ -1,12 +1,28 @@
-from api import main
-import asyncio
+import requests
 import flet as ft
 import bandeiras_moedas
 
 moedas_bandeiras = {valor: chave for chave, valor in bandeiras_moedas.bandeiras_moedas.items()}
 enxchange_logo = ft.Image(src="./exchange-logo.png", color="#000000", width=100, height=100)
 
-dados = asyncio.run(main())
+try:
+    url = "https://open.er-api.com/v6/latest/USD"
+    response = requests.get(url)
+    dados = response.json()
+except:
+    def main(page: ft.Page):
+        page.title = "Erro"
+        page.theme_mode = "system"
+        page.window.width = 400
+        page.window.height = 450
+        page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+        page.vertical_alignment = ft.MainAxisAlignment.CENTER
+        page.update()
+
+        page.add(ft.Text("ERRO: BAD RESPONSE. Por favor, verifique sua conexão com a internet",
+                         style=ft.TextStyle(color=ft.colors.ERROR)))
+    ft.app(main)
+    exit()
 
 def main(page: ft.Page):
     page.title = "Conversor de Moedas"
